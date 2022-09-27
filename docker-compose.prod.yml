@@ -1,0 +1,42 @@
+version: '3.1'
+
+services:
+  api:
+    platform: linux/amd64
+    image: '<your_application_name>/api'
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    expose:
+      - 4000
+    networks:
+      - web
+    labels:
+      # - 'traefik.enable=true'
+      # - 'traefik.http.routers.<your_application_name>-api.rule=Host(`api.<your_domain>`)'
+      # - 'traefik.http.routers.<your_application_name>-api.tls=true'
+      # - 'traefik.http.routers.<your_application_name>-api.tls.certresolver=letsencrypt'
+    depends_on:
+      - db
+    links:
+      - db:db
+  db:
+    image: postgres
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    expose:
+      - 5432
+    networks:
+      - web
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+
+volumes:
+  postgres_data:
+networks:
+  web:
+    name: web
+    external: true
